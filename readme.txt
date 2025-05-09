@@ -30,4 +30,4 @@ main.py: Ponto de entrada da aplicação FastAPI, onde a API é instanciada.
 
 
 
-Caminho -> routes -> controller -> 
+Caminho -> routes -> controller - (usando schema) -> service -> repository -> database -> 
