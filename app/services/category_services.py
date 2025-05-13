@@ -9,4 +9,7 @@ class CategoryService:
         self.category_repository = CategoryRepository(session)
 
     def create_category(self, category_create: CategoryCreate) -> Category:
+        
+        new_category = Category(name=category_create.name)
+        
         return self.category_repository.create_category(category_create)
