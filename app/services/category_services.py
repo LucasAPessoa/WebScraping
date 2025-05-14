@@ -1,5 +1,5 @@
 from sqlmodel import Session
-from app.models.category import Category
+from app.models.category_model import Category
 from app.schemas.category.category_schema import CategoryCreate
 from app.repositories.category_repository import CategoryRepository
 
@@ -9,7 +9,5 @@ class CategoryService:
         self.category_repository = CategoryRepository(session)
 
     def create_category(self, category_create: CategoryCreate) -> Category:
-        
-        new_category = Category(name=category_create.name)
         
         return self.category_repository.create_category(category_create)
