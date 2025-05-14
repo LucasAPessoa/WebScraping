@@ -1,15 +1,14 @@
-from typing import NewType
+from typing import Annotated
 from pydantic import BaseModel, constr, field_validator
 from uuid import UUID
 
 
-CategoryName = NewType("CategoryName", constr(min_length=1, max_length=50))
-
+NameType = Annotated[str, constr(min_length=1, max_length=50)]
 
 class CategoryCreate(BaseModel):
-    name: CategoryName
+    name: NameType
     
-    @field_validator("name", pre=True)
+    @field_validator("name", mode="before")
     def lowercase_name(cls, v):
         if isinstance(v, str):
             return v.lower()
@@ -20,5 +19,5 @@ class CategoryRead(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
     
