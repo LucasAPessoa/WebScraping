@@ -1,18 +1,9 @@
-from typing import Annotated
-from pydantic import BaseModel, constr, field_validator
 from uuid import UUID
-
-
-NameType = Annotated[str, constr(min_length=1, max_length=50)]
+from pydantic import BaseModel, Field
 
 class CategoryCreate(BaseModel):
-    name: NameType
+    name: str= Field(..., description="Name of the category")
     
-    @field_validator("name", mode="before")
-    def lowercase_name(cls, v):
-        if isinstance(v, str):
-            return v.lower()
-        return v
     
 class CategoryRead(BaseModel):
     id: UUID
