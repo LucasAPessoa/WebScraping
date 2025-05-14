@@ -1,13 +1,26 @@
 from sqlmodel import Session
-from app.models.category_model import Category
-from app.schemas.category.category_schema import CategoryCreate
+from app.schemas.category.category_schema import CategoryCreate, CategoryRead
 from app.repositories.category_repository import CategoryRepository
+from fastapi import HTTPException
 
 class CategoryService:
     def __init__(self, session: Session):
         self.session = session
         self.category_repository = CategoryRepository(session)
 
-    def create_category(self, category_create: CategoryCreate) -> Category:
+    def create_category(self, category_create: CategoryCreate) -> CategoryRead:
+        
+        name = category_create.name.strip().lower()
+        if not name:
+            raise HTTPException(status_code=400, detail="O nome da categoria é obrigatório.")
+        if len(name) < 3:
+            raise HTTPException(status_code=400, detail="O nome da categoria deve ter pelo menos 3 caracteres.")
+        if len(name) > 50:
+            raise HTTPException(status_code=400, detail="O nome da categoria deve ter no máximo 50 caracteres.")
+        if not name.isalnum():
+            raise HTTPException(status_code=400, detail="O nome da categoria deve conter apenas letras e números.")
+        
+        
+        
         
         return self.category_repository.create_category(category_create)
