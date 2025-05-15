@@ -20,3 +20,5 @@ def teste():
 
 def testePullRequest():
     return "testePullRequest"
+def testePullRequest2():
+    return "testePullRequest2"
