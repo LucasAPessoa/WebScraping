@@ -14,3 +14,6 @@ def create_category(category_create: CategoryCreate, session: Session):
 def update_category(category_id: str, category_update: CategoryRead, session: Session = Depends(get_session)):
     service = CategoryService(session)
     return service.update_category(category_id, category_update)
+
+def teste():
+    return "teste"
