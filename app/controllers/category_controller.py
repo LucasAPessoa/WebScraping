@@ -17,3 +17,6 @@ def update_category(category_id: str, category_update: CategoryRead, session: Se
 
 def teste():
     return "teste"
+
+def testePullRequest():
+    return "testePullRequest"
