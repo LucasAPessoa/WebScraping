@@ -9,3 +9,8 @@ from app.database.session import get_session
 def create_category(category_create: CategoryCreate, session: Session):
     service = CategoryService(session)
     return service.create_category(category_create)
+
+
+def update_category(category_id: str, category_update: CategoryRead, session: Session = Depends(get_session)):
+    service = CategoryService(session)
+    return service.update_category(category_id, category_update)
