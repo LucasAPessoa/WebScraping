@@ -2,6 +2,7 @@ from sqlmodel import Session
 from app.schemas.category.category_schema import CategoryCreate, CategoryRead
 from app.repositories.category_repository import CategoryRepository
 from fastapi import HTTPException
+from uuid import UUID
 
 class CategoryService:
     def __init__(self, session: Session):
@@ -24,3 +25,23 @@ class CategoryService:
         
         
         return self.category_repository.create_category(category_create)
+    
+    def update_category(self, category_id: str, category_update: CategoryCreate) -> CategoryRead:
+        
+        try:
+            category_uuid = UUID(category_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="ID de categoria inválido.")
+
+        
+        name = category_update.name.strip().lower()
+        if not name:
+            raise HTTPException(status_code=400, detail="O nome da categoria é obrigatório.")
+        if len(name) < 3:
+            raise HTTPException(status_code=400, detail="O nome da categoria deve ter pelo menos 3 caracteres.")
+        if len(name) > 50:
+            raise HTTPException(status_code=400, detail="O nome da categoria deve ter no máximo 50 caracteres.")
+        if not name.isalnum():
+            raise HTTPException(status_code=400, detail="O nome da categoria deve conter apenas letras e números.")
+        
+        return self.category_repository.update_category(category_uuid, category_update)
