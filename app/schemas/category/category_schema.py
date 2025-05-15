@@ -1,10 +1,13 @@
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 class CategoryCreate(BaseModel):
-    name: str= Field(..., description="Name of the category")
+    name: str
     
-    
+class CategoryUpdate(BaseModel):
+    id: str
+    name: str
+        
 class CategoryRead(BaseModel):
     id: UUID
     name: str
