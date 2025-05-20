@@ -14,3 +14,7 @@ def create_category(category_create: CategoryCreate, session: Session = Depends(
 @router.put("/{category_id}", response_model=CategoryRead)
 def update_category(category_id: str, category_update: CategoryUpdate, session: Session = Depends(get_session)):
     return category_controller.update_category(category_id, category_update, session)
+
+@router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_category(category_id: str, session: Session = Depends(get_session)):
+    return category_controller.delete_category(category_id, session)

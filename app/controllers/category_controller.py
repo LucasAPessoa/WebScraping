@@ -15,5 +15,6 @@ def update_category(category_id: str, category_update: CategoryRead, session: Se
     service = CategoryService(session)
     return service.update_category(category_id, category_update)
 
-def teste():
-    return "teste"
+def delete_category(category_id: str, session: Session = Depends(get_session)):
+    service = CategoryService(session)
+    return service.delete_category(category_id)

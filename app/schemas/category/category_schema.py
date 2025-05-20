@@ -8,6 +8,8 @@ class CategoryUpdate(BaseModel):
     id: str
     name: str
         
+class CategoryDelete(BaseModel):
+    id: str
 class CategoryRead(BaseModel):
     id: UUID
     name: str

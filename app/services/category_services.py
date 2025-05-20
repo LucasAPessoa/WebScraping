@@ -45,3 +45,16 @@ class CategoryService:
             raise HTTPException(status_code=400, detail="O nome da categoria deve conter apenas letras e números.")
         
         return self.category_repository.update_category(category_uuid, category_update)
+    
+    def delete_category(self, category_id: str) -> None:
+        try:
+            category_uuid = UUID(category_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="ID de categoria inválido.")
+
+        
+        category = self.category_repository.get_category_by_id(category_uuid)
+        if not category:
+            raise HTTPException(status_code=404, detail="Categoria não encontrada.")
+        
+        return self.category_repository.delete_category(category)

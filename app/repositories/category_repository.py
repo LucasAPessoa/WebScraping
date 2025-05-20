@@ -26,3 +26,7 @@ class CategoryRepository:
         self.session.refresh(category)
         return category
 
+    def delete_category(self, category_delete: CategoryDelete) -> None:
+        category = self.session.get(CategoryRead, category_delete)
+        self.session.delete(category)
+        self.session.commit()
