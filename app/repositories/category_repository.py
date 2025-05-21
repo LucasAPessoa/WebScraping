@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 from fastapi import HTTPException
 from sqlmodel import Session
 
@@ -19,10 +19,8 @@ class CategoryRepository:
         self.session.refresh(category)
         return category
     
-    def update_category(self, category_id: str, category_update: CategoryUpdate) -> CategoryRead:
-        category = self.session.get(CategoryRead, category_id)
-        if not category:
-            raise HTTPException(status_code=404, detail="Category not found")
+    def update_category(self, category_id: UUID, category_update: CategoryUpdate) -> CategoryRead:
+        category = self.session.get(Category, category_id)
         
         for key, value in category_update.model_dump().items():
             setattr(category, key, value)
@@ -32,6 +30,8 @@ class CategoryRepository:
         return category
 
     def delete_category(self, category_delete: CategoryDelete) -> None:
-        category = self.session.get(CategoryRead, category_delete)
-        self.session.delete(category)
+        self.session.delete(category_delete)
         self.session.commit()
+
+    def get_category_by_id(self, category_id: UUID) -> Category | None:
+        return self.session.get(Category, category_id)

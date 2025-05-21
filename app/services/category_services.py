@@ -1,5 +1,5 @@
 from sqlmodel import Session
-from app.schemas.category.category_schema import CategoryCreate, CategoryRead, CategoryUpdate
+from app.schemas.category.category_schema import CategoryCreate, CategoryRead, CategoryUpdate, CategoryDelete
 from app.repositories.category_repository import CategoryRepository
 from fastapi import HTTPException
 from uuid import UUID
@@ -35,6 +35,9 @@ class CategoryService:
         except ValueError:
             raise HTTPException(status_code=400, detail="ID de categoria inválido.")
 
+        category = self.category_repository.get_category_by_id(category_uuid)
+        if not category:
+            raise HTTPException(status_code=404, detail="Categoria não encontrada.")
         
         name = category_update.name.strip().lower()
         if not name:
@@ -60,3 +63,15 @@ class CategoryService:
             raise HTTPException(status_code=404, detail="Categoria não encontrada.")
         
         return self.category_repository.delete_category(category)
+    
+    def get_category_by_id(self, category_id: str) -> CategoryRead:
+        try:
+            category_uuid = UUID(category_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="ID de categoria inválido.")
+        
+        category = self.category_repository.get_category_by_id(category_uuid)
+        if not category:
+            raise HTTPException(status_code=404, detail="Categoria não encontrada.")
+
+        return category
