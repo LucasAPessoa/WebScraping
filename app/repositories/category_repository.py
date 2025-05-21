@@ -32,3 +32,6 @@ class CategoryRepository:
     def delete_category(self, category_delete: CategoryDelete) -> None:
         self.session.delete(category_delete)
         self.session.commit()
+
+    def get_category_by_id(self, category_id: UUID) -> Category | None:
+        return self.session.get(Category, category_id)
