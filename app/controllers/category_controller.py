@@ -1,6 +1,6 @@
 from fastapi import Depends
 from sqlmodel import Session
-from app.schemas.category.category_schema import CategoryCreate, CategoryRead
+from app.schemas.category.category_schema import CategoryCreate, CategoryDelete, CategoryUpdate
 from app.services.category_services import CategoryService
 from app.database.session import get_session
 
@@ -11,7 +11,7 @@ def create_category(category_create: CategoryCreate, session: Session):
     return service.create_category(category_create)
 
 
-def update_category(category_id: str, category_update: CategoryRead, session: Session = Depends(get_session)):
+def update_category(category_id: str, category_update: CategoryUpdate, session: Session = Depends(get_session)):
     service = CategoryService(session)
     return service.update_category(category_id, category_update)
 
