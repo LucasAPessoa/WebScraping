@@ -18,3 +18,7 @@ def update_category(category_id: str, category_update: CategoryUpdate, session: 
 def delete_category(category_id: str, session: Session = Depends(get_session)):
     service = CategoryService(session)
     return service.delete_category(category_id)
+
+def get_category_by_id(category_id: str, session: Session = Depends(get_session)):
+    service = CategoryService(session)
+    return service.get_category_by_id(category_id)
