@@ -5,7 +5,6 @@ class CategoryCreate(BaseModel):
     name: str
     
 class CategoryUpdate(BaseModel):
-    id: str
     name: str
         
 class CategoryDelete(BaseModel):
@@ -13,6 +12,10 @@ class CategoryDelete(BaseModel):
 class CategoryRead(BaseModel):
     id: UUID
     name: str
+    
+class CategoryReadList(BaseModel):
+    categories: list[CategoryRead]
+    
 
     class Config:
         from_attributes = True
