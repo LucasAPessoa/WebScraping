@@ -24,12 +24,22 @@ class Photo(SQLModel, table=True):
     url: str = Field(index=True, nullable=False)
     product_id: UUID = Field(foreign_key="product_placeholder.id")
     
+class Plataform(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    name: str = Field(index=True, nullable=False)
+    
+class ProductPlataform(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    product_placeholder_id: UUID = Field(foreign_key="product_placeholder.id")
+    plataform_id: UUID = Field(foreign_key="plataform.id")
+    
 class Product_Placeholder(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     name: str = Field(index=True, nullable=False)
     description: str = Field(index=True, nullable=False)
-    category_id: UUID = Field(foreign_key="category.id")
+    category: UUID = Field(foreign_key="category.id")
     metacritic_score: float = Field(index=True, nullable=False)
+    plataform: UUID = Field(foreign_key="plataform.id")
     
 class Product(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
