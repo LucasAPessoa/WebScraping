@@ -15,6 +15,11 @@ class CategoryService:
     def create_category(self, category_create: CategoryCreate) -> CategoryRead:
         
         name = category_create.name.strip().lower()
+        
+        existing_category = self.category_repository.get_category_by_name(name)
+        if existing_category:
+            raise HTTPException(status_code=400, detail="Categoria já existe.")
+        
         if not name:
             raise HTTPException(status_code=400, detail="O nome da categoria é obrigatório.")
         if len(name) < 3:
@@ -31,6 +36,8 @@ class CategoryService:
     
     def update_category(self, category_id: str, category_update: CategoryUpdate) -> CategoryRead:
         
+        
+        
         try:
             category_uuid = UUID(category_id)
         except ValueError:
@@ -41,6 +48,11 @@ class CategoryService:
             raise HTTPException(status_code=404, detail="Categoria não encontrada.")
         
         name = category_update.name.strip().lower()
+        
+        existing_category = self.category_repository.get_category_by_name(name)
+        if existing_category:
+            raise HTTPException(status_code=400, detail="Categoria já existe.")
+        
         if not name:
             raise HTTPException(status_code=400, detail="O nome da categoria é obrigatório.")
         if len(name) < 3:
