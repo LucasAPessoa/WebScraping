@@ -26,3 +26,7 @@ def get_category_by_id(category_id: str, session: Session = Depends(get_session)
 def get_all_categories(session: Session = Depends(get_session)):
     service = CategoryService(session)
     return service.get_all_categories()
+
+def get_category_by_name(category_name: str, session: Session = Depends(get_session)):
+    service = CategoryService(session)
+    return service.get_category_by_name(category_name)
