@@ -1,6 +1,6 @@
 from fastapi import Depends
 from sqlmodel import Session
-from app.schemas.category.category_schema import CategoryCreate, CategoryDelete, CategoryUpdate
+from app.schemas.category_schema import CategoryCreate, CategoryDelete, CategoryUpdate
 from app.services.category_services import CategoryService
 from app.database.session import get_session
 

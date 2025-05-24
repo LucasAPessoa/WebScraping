@@ -2,7 +2,7 @@ from uuid import UUID, uuid4
 from sqlmodel import Session, select
 
 from app.models.models import Category
-from app.schemas.category.category_schema import CategoryCreate, CategoryRead, CategoryDelete, CategoryUpdate, CategoryReadList
+from app.schemas.category_schema import CategoryCreate, CategoryRead, CategoryDelete, CategoryUpdate, CategoryReadList
 
 class CategoryRepository:   
     def __init__(self, session: Session):
