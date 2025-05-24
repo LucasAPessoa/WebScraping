@@ -37,3 +37,8 @@ class CategoryRepository:
     
     def get_all_categories(self) -> CategoryReadList:
         return self.session.exec(select(Category)).scalars().all()
+    
+    def get_category_by_name(self, category_name: str) -> Category | None:
+        return self.session.exec(
+    select(Category).where(Category.name.ilike(f"%{category_name.lower()}%"))
+).first()
