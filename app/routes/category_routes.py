@@ -22,3 +22,7 @@ def delete_category(category_id: str, session: Session = Depends(get_session)):
 @router.get("/{category_id}", response_model=CategoryRead)
 def get_category_by_id(category_id: str, session: Session = Depends(get_session)):
     return category_controller.get_category_by_id(category_id, session)
+
+@router.get("/", response_model=CategoryReadList)
+def get_all_categories(session: Session = Depends(get_session)):
+    return category_controller.get_all_categories(session)
