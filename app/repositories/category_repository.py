@@ -1,9 +1,8 @@
 from uuid import UUID, uuid4
-from fastapi import HTTPException
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.models.models import Category
-from app.schemas.category.category_schema import CategoryCreate, CategoryRead, CategoryDelete, CategoryUpdate
+from app.schemas.category.category_schema import CategoryCreate, CategoryRead, CategoryDelete, CategoryUpdate, CategoryReadList
 
 class CategoryRepository:   
     def __init__(self, session: Session):
@@ -35,3 +34,6 @@ class CategoryRepository:
 
     def get_category_by_id(self, category_id: UUID) -> Category | None:
         return self.session.get(Category, category_id)
+    
+    def get_all_categories(self) -> CategoryReadList:
+        return self.session.exec(select(Category)).scalars().all()
