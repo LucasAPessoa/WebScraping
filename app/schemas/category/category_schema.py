@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 from pydantic import BaseModel
 
@@ -14,8 +15,7 @@ class CategoryRead(BaseModel):
     name: str
     
 class CategoryReadList(BaseModel):
-    categories: list[CategoryRead]
-    
+    categories: List[CategoryRead] 
 
     class Config:
         from_attributes = True
