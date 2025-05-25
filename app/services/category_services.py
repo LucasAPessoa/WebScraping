@@ -90,6 +90,10 @@ class CategoryService:
         return category
     
     def get_all_categories(self) -> CategoryReadList:
-        result = self.session.exec(select(Category))
-        categories = result.all()
-        return {"categories": categories}
+        categories = self.category_repository.get_all_categories()
+        
+        if not categories:
+            raise HTTPException(status_code=404, detail="Nenhuma categoria encontrada.")
+        
+        category_read_list = [CategoryRead.model_validate(cat) for cat in categories]
+        return CategoryReadList(categories=category_read_list)
