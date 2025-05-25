@@ -1,5 +1,4 @@
-from sqlmodel import Session, select
-from app.models.models import Category
+from sqlmodel import Session
 from app.schemas.category_schema import CategoryCreate, CategoryRead, CategoryUpdate, CategoryReadList
 from app.repositories.category_repository import CategoryRepository
 from fastapi import HTTPException
