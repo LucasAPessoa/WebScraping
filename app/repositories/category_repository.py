@@ -35,8 +35,9 @@ class CategoryRepository:
     def get_category_by_id(self, category_id: UUID) -> Category | None:
         return self.session.get(Category, category_id)
     
-    def get_all_categories(self) -> CategoryReadList:
-        return self.session.exec(select(Category)).scalars().all()
+    def get_all_categories(self) -> list[Category]:
+        result = self.session.exec(select(Category))
+        return result.all()
     
     def get_category_by_name(self, category_name: str) -> Category | None:
         return self.session.exec(
