@@ -14,6 +14,9 @@ class CategoryRead(BaseModel):
     id: UUID
     name: str
     
+    class Config:
+        from_attributes = True
+    
 class CategoryReadList(BaseModel):
     categories: List[CategoryRead] 
 
