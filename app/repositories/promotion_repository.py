@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID, uuid4
 from sqlmodel import Session, select
 
@@ -25,3 +26,26 @@ class PromotionRepository:
         return self.session.exec(
             select(Promotion).where(Promotion.name.ilike(f"%{promotion_name.lower()}%"))
         ).first()
+        
+    def get_all_promotions(self) -> List[Promotion]:
+        result = self.session.exec(select(Promotion))
+        return result.all()
+    
+    def update_promotion(self, promotion_id: UUID, promotion_update: PromotionUpdate) -> PromotionRead:
+        promotion = self.session.get(Promotion, promotion_id)
+        
+        for key, value in promotion_update.model_dump().items():
+            setattr(promotion, key, value)
+        
+        self.session.commit()
+        self.session.refresh(promotion)
+        return promotion
+    
+    def delete_promotion(self, promotion_id: UUID) -> None:
+        promotion = self.session.get(Promotion, promotion_id)
+        if promotion:
+            self.session.delete(promotion)
+            self.session.commit()
+            
+            
+    
