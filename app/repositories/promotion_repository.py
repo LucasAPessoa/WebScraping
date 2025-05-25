@@ -31,8 +31,11 @@ class PromotionRepository:
         result = self.session.exec(select(Promotion))
         return result.all()
     
-    def update_promotion(self, promotion_id: UUID, promotion_update: PromotionUpdate) -> PromotionRead:
+    def update_promotion(self, promotion_id: UUID, promotion_update: PromotionUpdate) -> PromotionRead | None:
         promotion = self.session.get(Promotion, promotion_id)
+        
+        if not promotion:
+            return None
         
         for key, value in promotion_update.model_dump().items():
             setattr(promotion, key, value)
