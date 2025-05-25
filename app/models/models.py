@@ -17,7 +17,6 @@ class Establishment(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     name: str = Field(index=True, nullable=False)
     url: str = Field(index=True)
-    links_id: UUID = Field(foreign_key="link.id")
     
 class Photo(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
