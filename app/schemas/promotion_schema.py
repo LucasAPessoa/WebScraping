@@ -14,7 +14,12 @@ class PromotionDelete(BaseModel):
 class PromotionRead(BaseModel):
     id: UUID
     name: str
+
+    class Config:
+        from_attributes = True
     
 class PromotionReadList(BaseModel):
     promotions: List[PromotionRead]
 
+    class Config:
+        from_attributes = True
