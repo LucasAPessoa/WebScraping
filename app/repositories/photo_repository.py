@@ -9,7 +9,7 @@ class PhotoRepository:
         self.session = session
 
     def create_photo(self, photo_create: PhotoCreate) -> Photo:
-        photo = Photo(id=uuid4(), **photo_create.model_dump())
+        photo = Photo(**photo_create.model_dump())
         self.session.add(photo)
         self.session.commit()
         self.session.refresh(photo)
