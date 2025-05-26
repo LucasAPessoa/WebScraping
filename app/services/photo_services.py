@@ -54,3 +54,14 @@ class PhotoService:
             raise HTTPException(status_code=404, detail="Foto não encontrada.")
 
         self.photo_repository.delete_photo(uuid)
+
+    def get_photos_by_product_id(self, product_id: str) -> PhotoReadList:
+        try:
+            uuid = UUID(product_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="ID inválido.")
+
+        photos = self.photo_repository.get_photos_by_product_id(uuid)
+        if not photos:
+            raise HTTPException(status_code=404, detail="Nenhuma foto encontrada para este produto.")
+        return PhotoReadList(photos=[PhotoRead.model_validate(p) for p in photos])
