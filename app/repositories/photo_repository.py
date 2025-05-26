@@ -36,3 +36,8 @@ class PhotoRepository:
         if photo:
             self.session.delete(photo)
             self.session.commit()
+
+    def get_photos_by_product_id(self, product_id: UUID) -> List[Photo]:
+        return self.session.exec(
+            select(Photo).where(Photo.product_id == product_id)
+        ).all()
