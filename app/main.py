@@ -4,6 +4,7 @@ from app.routes.promotion_routes import promotion_router
 from app.routes.link_routes import link_router
 from app.routes.establishment_routes import establishment_router
 from app.routes.plataform_routes import plataform_router
+from app.routes.product_placeholder_routes import product_placeholder_router
 from app.database.session import create_db_and_tables
 from contextlib import asynccontextmanager
 
@@ -21,3 +22,4 @@ app.include_router(promotion_router)
 app.include_router(link_router)
 app.include_router(establishment_router)
 app.include_router(plataform_router)
+app.include_router(product_placeholder_router)
