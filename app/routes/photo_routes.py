@@ -25,3 +25,7 @@ def update_photo(photo_id: str, photo_update: PhotoUpdate, session: Session = De
 @photo_router.delete("/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_photo(photo_id: str, session: Session = Depends(get_session)):
     return photo_controller.delete_photo(photo_id, session)
+
+@photo_router.get("/product/{product_id}", response_model=PhotoReadList, status_code=status.HTTP_200_OK)
+def get_photos_by_product_id(product_id: str, session: Session = Depends(get_session)):
+    return photo_controller.get_photos_by_product_id(product_id, session)
