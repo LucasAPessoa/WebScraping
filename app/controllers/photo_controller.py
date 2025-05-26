@@ -23,3 +23,7 @@ def update_photo(photo_id: str, photo_update: PhotoUpdate, session: Session = De
 def delete_photo(photo_id: str, session: Session = Depends(get_session)):
     service = PhotoService(session)
     return service.delete_photo(photo_id)
+
+def get_photos_by_product_id(product_id: str, session: Session = Depends(get_session)):
+    service = PhotoService(session)
+    return service.get_photos_by_product_id(product_id)
