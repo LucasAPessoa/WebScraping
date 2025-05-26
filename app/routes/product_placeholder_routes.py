@@ -10,7 +10,7 @@ from app.schemas.product_placeholder_schema import (
 from app.controllers import product_placeholder_controller as controller
 from app.database.session import get_session
 
-product_placeholder_router = APIRouter(prefix="/products", tags=["Products"])
+product_placeholder_router = APIRouter(prefix="/products_placeholder", tags=["ProductsPlaceholder"])
 
 @product_placeholder_router.post("/", response_model=ProductPlaceholderRead, status_code=status.HTTP_201_CREATED)
 def create_product(data: ProductPlaceholderCreate, session: Session = Depends(get_session)):
