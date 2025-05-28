@@ -10,6 +10,7 @@ from app.routes.product_routes import product_router
 from app.routes.product_plataform_routes import product_plataform_router
 from app.database.session import create_db_and_tables
 from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
 
 # @asynccontextmanager
 # async def lifespan(app: FastAPI):
@@ -19,6 +20,14 @@ from contextlib import asynccontextmanager
 # app = FastAPI(lifespan=lifespan)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Ou especifique domínios ex: ["https://meusite.com"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+    )
 
 app.include_router(category_router)
 app.include_router(promotion_router)
