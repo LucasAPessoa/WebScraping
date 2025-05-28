@@ -1,6 +1,10 @@
-from sqlmodel import SQLModel, Field
+from typing import List, TYPE_CHECKING
+from sqlmodel import Relationship, SQLModel, Field
 from uuid import UUID, uuid4
 
+if TYPE_CHECKING:
+    from .models import Product_Placeholder  
+    from .models import Plataform 
 class Category(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     name: str = Field(index=True, nullable=False)
@@ -23,14 +27,20 @@ class Photo(SQLModel, table=True):
     url: str = Field(index=True, nullable=False)
     product_id: UUID = Field(foreign_key="product_placeholder.id")
     
-class Plataform(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    name: str = Field(index=True, nullable=False)
     
 class ProductPlataform(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     product_placeholder_id: UUID = Field(foreign_key="product_placeholder.id")
     plataform_id: UUID = Field(foreign_key="plataform.id")
+class Plataform(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    name: str = Field(index=True, nullable=False)
+    
+    products: List["Product_Placeholder"] = Relationship(
+        back_populates="plataforms", link_model=ProductPlataform
+    )
+    
+
     
 class Product_Placeholder(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
@@ -40,6 +50,9 @@ class Product_Placeholder(SQLModel, table=True):
     metacritic_score: float = Field(index=True, nullable=False)
     plataform: UUID = Field(foreign_key="plataform.id")
     
+    plataforms: List["Plataform"] = Relationship(
+        back_populates="products", link_model=ProductPlataform
+    )
 class Product(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     original_price: float = Field(index=True, nullable=False)
