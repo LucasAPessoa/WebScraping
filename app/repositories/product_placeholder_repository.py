@@ -9,7 +9,7 @@ class ProductPlaceholderRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def create(self, product_data: ProductPlaceholderCreate, metacritic_score: float) -> Product_Placeholder:
+    def create_product_placeholer(self, product_data: ProductPlaceholderCreate, metacritic_score: float) -> Product_Placeholder:
         product = Product_Placeholder(
             id=uuid4(),
             name=product_data.name.strip(),
@@ -23,13 +23,13 @@ class ProductPlaceholderRepository:
         self.session.refresh(product)
         return product
 
-    def get_all(self) -> List[Product_Placeholder]:
+    def get_all_product_placeholer(self) -> List[Product_Placeholder]:
         return self.session.exec(select(Product_Placeholder)).all()
 
-    def get_by_id(self, product_id: UUID) -> Product_Placeholder | None:
+    def get__product_placeholer_by_id(self, product_id: UUID) -> Product_Placeholder | None:
         return self.session.get(Product_Placeholder, product_id)
 
-    def update(self, product_id: UUID, product_data: ProductPlaceholderUpdate, metacritic_score: float) -> Product_Placeholder | None:
+    def update_product_placeholer(self, product_id: UUID, product_data: ProductPlaceholderUpdate, metacritic_score: float) -> Product_Placeholder | None:
         product = self.session.get(Product_Placeholder, product_id)
         if not product:
             return None
@@ -44,7 +44,7 @@ class ProductPlaceholderRepository:
         self.session.refresh(product)
         return product
 
-    def delete(self, product_id: UUID):
+    def delete_product_placeholer(self, product_id: UUID):
         product = self.session.get(Product_Placeholder, product_id)
         if product:
             self.session.delete(product)

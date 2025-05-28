@@ -31,16 +31,16 @@ class ProductPlaceholderService:
 
         return float(results[0].get("metacritic", 0.0))  # Pode ajustar conforme estrutura da API
 
-    def create(self, data: ProductPlaceholderCreate) -> ProductPlaceholderRead:
+    def create_product_placeholder(self, data: ProductPlaceholderCreate) -> ProductPlaceholderRead:
         score = self.fetch_metacritic_score(data.name)
         product = self.repository.create(data, score)
         return ProductPlaceholderRead.model_validate(product)
 
-    def get_all(self) -> ProductPlaceholderReadList:
+    def get_all_product_placeholder(self) -> ProductPlaceholderReadList:
         products = self.repository.get_all()
         return ProductPlaceholderReadList(products=[ProductPlaceholderRead.model_validate(p) for p in products])
 
-    def get_by_id(self, product_id: str) -> ProductPlaceholderRead:
+    def get_product_placeholder_by_id(self, product_id: str) -> ProductPlaceholderRead:
         try:
             uuid = UUID(product_id)
         except ValueError:
@@ -52,7 +52,7 @@ class ProductPlaceholderService:
 
         return ProductPlaceholderRead.model_validate(product)
 
-    def update(self, product_id: str, data: ProductPlaceholderUpdate) -> ProductPlaceholderRead:
+    def update_product_placeholder(self, product_id: str, data: ProductPlaceholderUpdate) -> ProductPlaceholderRead:
         try:
             uuid = UUID(product_id)
         except ValueError:
@@ -66,7 +66,7 @@ class ProductPlaceholderService:
 
         return ProductPlaceholderRead.model_validate(updated)
 
-    def delete(self, product_id: str):
+    def delete_product_placeholder(self, product_id: str):
         try:
             uuid = UUID(product_id)
         except ValueError:

@@ -14,20 +14,20 @@ product_placeholder_router = APIRouter(prefix="/products_placeholder", tags=["Pr
 
 @product_placeholder_router.post("/", response_model=ProductPlaceholderRead, status_code=status.HTTP_201_CREATED)
 def create_product(data: ProductPlaceholderCreate, session: Session = Depends(get_session)):
-    return controller.create_product(data, session)
+    return controller.create_product_placeholer(data, session)
 
 @product_placeholder_router.get("/", response_model=ProductPlaceholderReadList)
 def list_products(session: Session = Depends(get_session)):
-    return controller.get_all_products(session)
+    return controller.get_all_product_placeholder(session)
 
 @product_placeholder_router.get("/{product_id}", response_model=ProductPlaceholderRead)
 def get_product(product_id: str, session: Session = Depends(get_session)):
-    return controller.get_product_by_id(product_id, session)
+    return controller.get_product_placeholder_by_id(product_id, session)
 
 @product_placeholder_router.put("/{product_id}", response_model=ProductPlaceholderRead)
 def update_product(product_id: str, data: ProductPlaceholderUpdate, session: Session = Depends(get_session)):
-    return controller.update_product(product_id, data, session)
+    return controller.update_product_placeholder(product_id, data, session)
 
 @product_placeholder_router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_product(product_id: str, session: Session = Depends(get_session)):
-    return controller.delete_product(product_id, session)
+    return controller.delete_product_placeholder(product_id, session)
