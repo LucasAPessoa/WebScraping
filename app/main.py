@@ -12,14 +12,14 @@ from app.database.session import create_db_and_tables
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     await create_db_and_tables()
-#     yield
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_db_and_tables()
+    yield
 
-# app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan)
 
-app = FastAPI()
+# app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
