@@ -1,4 +1,4 @@
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Optional
 from sqlmodel import Relationship, SQLModel, Field
 from uuid import UUID, uuid4
 
@@ -22,11 +22,16 @@ class Establishment(SQLModel, table=True):
     name: str = Field(index=True, nullable=False)
     url: str = Field(index=True)
     
+    
 class Photo(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     url: str = Field(index=True, nullable=False)
-    product_id: UUID = Field(foreign_key="product_placeholder.id")
-    
+
+    product_placeholder_id: UUID = Field(foreign_key="product_placeholder.id")
+
+
+    product_placeholder: Optional["Product_Placeholder"] = Relationship(back_populates="photos")
+
     
 class ProductPlataform(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
@@ -48,7 +53,8 @@ class Product_Placeholder(SQLModel, table=True):
     description: str = Field(index=True, nullable=False)
     category: UUID = Field(foreign_key="category.id")
     metacritic_score: float = Field(index=True, nullable=False)
-    plataform: UUID = Field(foreign_key="plataform.id")
+    
+    photos: List["Photo"] = Relationship(back_populates="product_placeholder")
     
     plataforms: List["Plataform"] = Relationship(
         back_populates="products", link_model=ProductPlataform
