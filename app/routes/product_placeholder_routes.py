@@ -14,7 +14,7 @@ product_placeholder_router = APIRouter(prefix="/products_placeholder", tags=["Pr
 
 @product_placeholder_router.post("/", response_model=ProductPlaceholderRead, status_code=status.HTTP_201_CREATED)
 def create_product(data: ProductPlaceholderCreate, session: Session = Depends(get_session)):
-    return controller.create_product_placeholer(data, session)
+    return controller.create_product_placeholder(data, session)
 
 @product_placeholder_router.get("/", response_model=ProductPlaceholderReadList)
 def list_products(session: Session = Depends(get_session)):
