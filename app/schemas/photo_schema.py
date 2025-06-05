@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class PhotoCreate(BaseModel):
     url: str
-    product_id: UUID
+    product_placeholder_id: UUID
 
 class PhotoUpdate(BaseModel):
     url: str
@@ -12,7 +12,8 @@ class PhotoUpdate(BaseModel):
 class PhotoRead(BaseModel):
     id: UUID
     url: str
-    product_id: UUID
+    product_placeholder_id: UUID
+
 
     class Config:
         from_attributes = True
