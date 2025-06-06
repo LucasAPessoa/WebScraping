@@ -9,14 +9,14 @@ class ProductPlaceholderRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def create_product_placeholder(self, product_data: ProductPlaceholderCreate, metacritic_score: float) -> Product_Placeholder:
+    def create_product_placeholder(self, product_data: ProductPlaceholderCreate, **game_info) -> Product_Placeholder:
         product = Product_Placeholder(
             id=uuid4(),
             name=product_data.name.strip(),
             description=product_data.description.strip(),
             category=product_data.category,
             plataform=product_data.plataform,
-            metacritic_score=metacritic_score
+            **game_info
         )
         self.session.add(product)
         self.session.commit()
@@ -33,7 +33,7 @@ class ProductPlaceholderRepository:
 
         if product:
             photos = self.session.exec(
-                select(Photo).where(Photo.product_id == id)
+                select(Photo).where(Photo.product_placeholder_id == id)
             ).all()
             product.photos = photos
             
@@ -44,17 +44,20 @@ class ProductPlaceholderRepository:
 
         return product
 
-    def update_product_placeholer(self, product_id: UUID, product_data: ProductPlaceholderUpdate, metacritic_score: float) -> Product_Placeholder | None:
-        product = self.session.get(Product_Placeholder, product_id)
+    def update_product_placeholer(self, id: UUID, product_data: ProductPlaceholderUpdate, **game_info) -> Product_Placeholder:
+        product = self.session.get(Product_Placeholder, id)
         if not product:
             return None
 
-        product.name = product_data.name.strip()
-        product.description = product_data.description.strip()
-        product.category = product_data.category
-        product.plataform = product_data.plataform
-        product.metacritic_score = metacritic_score
+        update_data = product_data.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            if value is not None:
+                setattr(product, key, value)
 
+        for key, value in game_info.items():
+            setattr(product, key, value)
+
+        self.session.add(product)
         self.session.commit()
         self.session.refresh(product)
         return product
