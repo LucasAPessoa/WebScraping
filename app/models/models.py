@@ -26,13 +26,9 @@ class Establishment(SQLModel, table=True):
 class Photo(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     url: str = Field(index=True, nullable=False)
-
     product_placeholder_id: UUID = Field(foreign_key="product_placeholder.id")
-
-
     product_placeholder: Optional["Product_Placeholder"] = Relationship(back_populates="photos")
 
-    
 class ProductPlataform(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     product_placeholder_id: UUID = Field(foreign_key="product_placeholder.id")
@@ -52,13 +48,23 @@ class Product_Placeholder(SQLModel, table=True):
     name: str = Field(index=True, nullable=False)
     description: str = Field(index=True, nullable=False)
     category: UUID = Field(foreign_key="category.id")
+    plataform: UUID = Field(foreign_key="plataform.id")
     metacritic_score: float = Field(index=True, nullable=False)
+    rating: float = Field(default=0.0)
+    rating_top: int = Field(default=0)
+    released_date: Optional[str] = Field(default=None)
+    website: Optional[str] = Field(default=None)
+    background_image: Optional[str] = Field(default=None)
+    background_image_additional: Optional[str] = Field(default=None)
+    genres: Optional[str] = Field(default=None)  # Armazenado como JSON string
+    developers: Optional[str] = Field(default=None)  # Armazenado como JSON string
+    publishers: Optional[str] = Field(default=None)  # Armazenado como JSON string
     
     photos: List["Photo"] = Relationship(back_populates="product_placeholder")
-    
     plataforms: List["Plataform"] = Relationship(
         back_populates="products", link_model=ProductPlataform
     )
+
 class Product(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     original_price: float = Field(index=True, nullable=False)
