@@ -1,25 +1,23 @@
+from typing import Optional
 from uuid import UUID
-from typing import List
 from pydantic import BaseModel
 
-class PhotoCreate(BaseModel):
+class PhotoBase(BaseModel):
     url: str
     product_placeholder_id: UUID
+
+class PhotoCreate(PhotoBase):
+    pass
 
 class PhotoUpdate(BaseModel):
-    url: str
+    url: Optional[str] = None
+    product_placeholder_id: Optional[UUID] = None
 
-class PhotoRead(BaseModel):
+class PhotoRead(PhotoBase):
     id: UUID
-    url: str
-    product_placeholder_id: UUID
-
 
     class Config:
         from_attributes = True
 
 class PhotoReadList(BaseModel):
-    photos: List[PhotoRead]
-
-    class Config:
-        from_attributes = True
+    photos: list[PhotoRead]
