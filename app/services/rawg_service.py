@@ -1,13 +1,14 @@
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 import requests
 from fastapi import HTTPException
 import json
 from datetime import datetime, timedelta
 import os
+import httpx
 
 class RAWGService:
     def __init__(self):
-        self.api_key = "3d33178e180644ba9c0dcbaa98278664"
+        self.api_key = os.getenv("3d33178e180644ba9c0dcbaa98278664")
         self.base_url = "https://api.rawg.io/api"
         self.cache_dir = "cache/rawg"
         self.cache_duration = timedelta(days=1)
@@ -127,4 +128,52 @@ class RAWGService:
             "background_image": game_data.get("background_image"),
             "website": game_data.get("website"),
             "background_image_additional": game_data.get("background_image_additional")
+        }
+
+    async def get_game_details(self, game_id: int) -> Optional[Dict[str, Any]]:
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(
+                    f"{self.base_url}/games/{game_id}",
+                    params={"key": self.api_key}
+                )
+                response.raise_for_status()
+                return response.json()
+            except httpx.HTTPError as e:
+                print(f"Error fetching game details: {e}")
+                return None
+
+    async def search_games(self, query: str, page: int = 1, page_size: int = 20) -> Optional[Dict[str, Any]]:
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(
+                    f"{self.base_url}/games",
+                    params={
+                        "key": self.api_key,
+                        "search": query,
+                        "page": page,
+                        "page_size": page_size
+                    }
+                )
+                response.raise_for_status()
+                return response.json()
+            except httpx.HTTPError as e:
+                print(f"Error searching games: {e}")
+                return None
+
+    def format_game_data(self, game_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Format RAWG game data to match our schema"""
+        return {
+            "name": game_data.get("name", ""),
+            "description": game_data.get("description", ""),
+            "metacritic_score": game_data.get("metacritic", 0),
+            "rating": game_data.get("rating", 0),
+            "rating_top": game_data.get("rating_top", 5),
+            "released_date": game_data.get("released"),
+            "website": game_data.get("website"),
+            "background_image": game_data.get("background_image"),
+            "background_image_additional": game_data.get("background_image_additional"),
+            "genres": [genre["name"] for genre in game_data.get("genres", [])],
+            "developers": [dev["name"] for dev in game_data.get("developers", [])],
+            "publishers": [pub["name"] for pub in game_data.get("publishers", [])]
         } 

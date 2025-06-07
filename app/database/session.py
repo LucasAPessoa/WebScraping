@@ -1,23 +1,29 @@
-from sqlmodel import create_engine, Session, SQLModel
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.models.models import Base
 
-from app.models.models import (
-    Category,
-    Promotion,
-    Link,
-    Establishment,
-    Photo,
-    Product_Placeholder,
-    Product
-)
+# Configuração do banco de dados
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:teste123@localhost:5432/webscraping"
 
-DATABASE_URL = "postgresql+psycopg2://postgres:teste123@localhost:5432/webscraper"
+# Cria o engine do SQLAlchemy
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
-engine = create_engine(DATABASE_URL, echo=True)
+# Cria a sessão do SQLAlchemy
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-async def create_db_and_tables():
-    print("Criando tabelas...")
-    SQLModel.metadata.create_all(engine)
+# Função para obter a sessão do banco de dados
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-def get_session():
-    with Session(engine) as session:
-        yield session
+# Função para criar as tabelas do banco de dados
+def create_tables():
+    Base.metadata.create_all(bind=engine)
+
+# Função para recriar as tabelas do banco de dados
+def recreate_tables():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)

@@ -1,80 +1,86 @@
-from typing import List, TYPE_CHECKING, Optional
-from sqlmodel import Relationship, SQLModel, Field
-from uuid import UUID, uuid4
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, JSON, Boolean, Text
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
 
-if TYPE_CHECKING:
-    from .models import Product_Placeholder  
-    from .models import Plataform 
-class Category(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    name: str = Field(index=True, nullable=False)
-    
-class Promotion(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    name: str = Field(index=True, nullable=False)
+Base = declarative_base()
 
-class Link(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    url: str = Field(index=True, nullable=False)
-    
-class Establishment(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    name: str = Field(index=True, nullable=False)
-    url: str = Field(index=True)
-    
-    
-class Photo(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    url: str = Field(index=True, nullable=False)
-    product_placeholder_id: UUID = Field(foreign_key="product_placeholder.id")
-    product_placeholder: Optional["Product_Placeholder"] = Relationship(back_populates="photos")
+class Promotion(Base):
+    __tablename__ = "promotion"
 
-class ProductPlataform(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    product_placeholder_id: UUID = Field(foreign_key="product_placeholder.id")
-    plataform_id: UUID = Field(foreign_key="plataform.id")
-class Plataform(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    name: str = Field(index=True, nullable=False)
-    
-    products: List["Product_Placeholder"] = Relationship(
-        back_populates="plataforms", link_model=ProductPlataform
-    )
-    
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    start_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime, nullable=False)
+    is_active = Column(Boolean, default=True)
+    discount_percentage = Column(Float, nullable=False)
+    product_placeholder_id = Column(String, ForeignKey("product_placeholder.id"), nullable=False)
 
-    
-class Product_Placeholder(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    name: str = Field(index=True, nullable=False)
-    description: str = Field(index=True, nullable=False)
-    category: UUID = Field(foreign_key="category.id")
-    plataform: UUID = Field(foreign_key="plataform.id")
-    metacritic_score: float = Field(index=True, nullable=False)
-    rating: float = Field(default=0.0)
-    rating_top: int = Field(default=0)
-    released_date: Optional[str] = Field(default=None)
-    website: Optional[str] = Field(default=None)
-    background_image: Optional[str] = Field(default=None)
-    background_image_additional: Optional[str] = Field(default=None)
-    genres: Optional[str] = Field(default=None)  # Armazenado como JSON string
-    developers: Optional[str] = Field(default=None)  # Armazenado como JSON string
-    publishers: Optional[str] = Field(default=None)  # Armazenado como JSON string
-    
-    photos: List["Photo"] = Relationship(back_populates="product_placeholder")
-    plataforms: List["Plataform"] = Relationship(
-        back_populates="products", link_model=ProductPlataform
-    )
+    # Relacionamentos
+    product_placeholder = relationship("Product_Placeholder", back_populates="promotions")
+    products = relationship("Product", back_populates="promotion")
 
-class Product(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    original_price: float = Field(index=True, nullable=False)
-    discounted_price: float = Field(index=True, nullable=False)
-    product_placeholder_id: UUID = Field(foreign_key="product_placeholder.id")
-    establishment_id: UUID = Field(foreign_key="establishment.id")
-    promotion_id: UUID = Field(foreign_key="promotion.id")
-    
-    @property
+class Establishment(Base):
+    __tablename__ = "establishment"
+
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    url = Column(String, nullable=False)
+    logo_url = Column(String, nullable=True)
+
+    # Relacionamentos
+    products = relationship("Product", back_populates="establishment")
+
+class Product_Placeholder(Base):
+    __tablename__ = "product_placeholder"
+
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    metacritic_score = Column(Integer, nullable=True)
+    rating = Column(Float, nullable=True)
+    released = Column(String, nullable=True)
+    background_image = Column(String, nullable=True)
+    background_image_additional = Column(String, nullable=True)
+    website = Column(String, nullable=True)
+    rawg_id = Column(Integer, nullable=True)
+    genres = Column(String, nullable=True)
+    platforms = Column(String, nullable=True)
+    developers = Column(String, nullable=True)
+    publishers = Column(String, nullable=True)
+    screenshots = Column(Text, nullable=True)
+    esrb_rating = Column(String, nullable=True)
+    playtime = Column(Integer, nullable=True)
+    achievements_count = Column(Integer, nullable=True)
+    parent_platforms = Column(String, nullable=True)
+
+    # Relacionamentos
+    products = relationship("Product", back_populates="product_placeholder")
+    promotions = relationship("Promotion", back_populates="product_placeholder")
+
+class Product(Base):
+    __tablename__ = "product"
+
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    price = Column(Float, nullable=False)
+    discount_price = Column(Float, nullable=True)
+    url = Column(String, nullable=False)
+    image_url = Column(String, nullable=True)
+    product_placeholder_id = Column(String, ForeignKey("product_placeholder.id"), nullable=False)
+    establishment_id = Column(String, ForeignKey("establishment.id"), nullable=False)
+    promotion_id = Column(String, ForeignKey("promotion.id"), nullable=True)
+
+    # Relacionamentos
+    product_placeholder = relationship("Product_Placeholder", back_populates="products")
+    establishment = relationship("Establishment", back_populates="products")
+    promotion = relationship("Promotion", back_populates="products")
+
     def percentage_discount(self) -> float:
-        if self.original_price == 0:
+        """Calcula o percentual de desconto do produto"""
+        if not self.price or not self.discount_price:
             return 0.0
-        return round((1 - self.discounted_price / self.original_price) * 100, 2)
+        return ((self.price - self.discount_price) / self.price) * 100
