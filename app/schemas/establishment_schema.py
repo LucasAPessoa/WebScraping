@@ -11,10 +11,10 @@ class EstablishmentUpdate(BaseModel):
     url: str | None = None
     
 class EstablishmentDelete(BaseModel):
-    id: UUID
+    id: str
     
 class EstablishmentRead(BaseModel):
-    id: UUID
+    id: str
     name: str
     url: str | None = None
 

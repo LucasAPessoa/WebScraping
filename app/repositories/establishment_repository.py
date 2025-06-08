@@ -1,24 +1,18 @@
 from sqlalchemy.orm import Session
 from app.models.models import Establishment
-from app.schemas.establishment_schema import EstablishmentCreate, EstablishmentUpdate
+from app.schemas.establishment_schema import EstablishmentCreate, EstablishmentUpdate, EstablishmentRead
 from typing import List, Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 class EstablishmentRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_establishment(self, establishment_data: EstablishmentCreate) -> Establishment:
-        """Cria um novo estabelecimento"""
+    def create(self, establishment: EstablishmentCreate) -> Establishment:
         try:
             establishment = Establishment(
-                id=establishment_data.id,
-                name=establishment_data.name,
-                description=establishment_data.description,
-                address=establishment_data.address,
-                phone=establishment_data.phone,
-                email=establishment_data.email,
-                website=establishment_data.website
+                id=str(uuid4()),
+                **establishment.model_dump()
             )
             self.db.add(establishment)
             self.db.commit()
@@ -28,45 +22,31 @@ class EstablishmentRepository:
             self.db.rollback()
             raise e
 
-    def get_all_establishments(self) -> List[Establishment]:
-        """Retorna todos os estabelecimentos"""
-        return self.db.query(Establishment).all()
-
-    def get_establishment_by_id(self, establishment_id: str) -> Optional[Establishment]:
-        """Busca um estabelecimento pelo ID"""
+    def get_by_id(self, establishment_id: UUID) -> Optional[Establishment]:
         return self.db.query(Establishment).filter(Establishment.id == establishment_id).first()
 
-    def update_establishment(self, establishment_id: str, establishment_data: EstablishmentUpdate) -> Optional[Establishment]:
-        """Atualiza um estabelecimento"""
-        try:
-            establishment = self.get_establishment_by_id(establishment_id)
-            if not establishment:
-                return None
+    def get_by_name(self, name: str) -> Optional[Establishment]:
+        return self.db.query(Establishment).filter(Establishment.name.ilike(f"%{name}%")).first()
 
-            update_data = establishment_data.dict(exclude_unset=True)
-            for key, value in update_data.items():
-                setattr(establishment, key, value)
+    def get_all(self) -> List[Establishment]:
+        return self.db.query(Establishment).all()
 
+    def update(self, establishment_id: UUID, establishment: EstablishmentUpdate) -> Optional[Establishment]:
+        db_establishment = self.get_by_id(establishment_id)
+        if db_establishment:
+            for key, value in establishment.model_dump(exclude_unset=True).items():
+                setattr(db_establishment, key, value)
             self.db.commit()
-            self.db.refresh(establishment)
-            return establishment
-        except Exception as e:
-            self.db.rollback()
-            raise e
+            self.db.refresh(db_establishment)
+        return db_establishment
 
-    def delete_establishment(self, establishment_id: str) -> bool:
-        """Remove um estabelecimento"""
-        try:
-            establishment = self.get_establishment_by_id(establishment_id)
-            if not establishment:
-                return False
-
-            self.db.delete(establishment)
+    def delete(self, establishment_id: UUID) -> bool:
+        db_establishment = self.get_by_id(establishment_id)
+        if db_establishment:
+            self.db.delete(db_establishment)
             self.db.commit()
             return True
-        except Exception as e:
-            self.db.rollback()
-            raise e
+        return False
 
     def get_establishment_by_name(self, name: str) -> Optional[Establishment]:
         """Busca um estabelecimento pelo nome"""

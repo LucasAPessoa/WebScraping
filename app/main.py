@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.product_placeholder_routes import router as product_placeholder_router
-from app.routes.establishment_routes import establishment_router
-from app.routes.promotion_routes import promotion_router
-from app.routes.product_routes import product_router
+from app.routes.establishment_routes import router as establishment_router
+from app.routes.promotion_routes import router as promotion_router
+from app.routes.product_routes import router as product_router
 from app.database.session import create_tables
 
 app = FastAPI(title="Web Scraping API")

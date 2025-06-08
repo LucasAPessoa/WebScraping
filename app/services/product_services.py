@@ -1,7 +1,8 @@
 from uuid import UUID
 from fastapi import HTTPException
-from sqlmodel import Session, select
+from sqlalchemy.orm import Session
 from app.repositories.product_repository import ProductRepository
+from app.repositories.promotion_repository import PromotionRepository
 from app.schemas.product_schema import ProductCreate, ProductUpdate, ProductRead, ProductReadList
 from app.models.models import Product, Promotion
 from typing import List, Optional
@@ -9,54 +10,85 @@ from typing import List, Optional
 class ProductService:
     def __init__(self, session: Session):
         self.repo = ProductRepository(session)
+        self.promotion_repo = PromotionRepository(session)
         self.session = session
-
-    def _find_matching_promotion(self, percentage_discount: float) -> Optional[Promotion]:
-        """Encontra uma promoção que corresponda ao percentual de desconto"""
-        statement = select(Promotion).where(
-            Promotion.min_discount_percentage <= percentage_discount,
-            (Promotion.max_discount_percentage >= percentage_discount) | (Promotion.max_discount_percentage.is_(None))
-        )
-        return self.session.exec(statement).first()
 
     def create_product(self, product_data: ProductCreate) -> Product:
         """Cria um novo produto e associa automaticamente a uma promoção se aplicável"""
-        # Calcula o percentual de desconto
-        percentage_discount = ((product_data.original_price - product_data.discounted_price) / product_data.original_price) * 100
+        try:
+            # Cria o produto
+            product = self.repo.create_product(product_data)
+            
+            # Calcula o percentual de desconto do produto
+            discount_percentage = product.percentage_discount()
+            
+            # Busca todas as promoções ativas
+            promotions = self.promotion_repo.get_all_promotions()
+            
+            # Para cada promoção, verifica se o produto deve ser associado
+            for promotion in promotions:
+                if promotion.min_discount_percentage <= discount_percentage <= promotion.max_discount_percentage:
+                    self.repo.update_product_promotion(product.id, promotion.id)
+                    break
+            
+            return self.repo.get_by_id(product.id)
+        except Exception as e:
+            self.session.rollback()
+            raise e
 
-        # Encontra uma promoção que corresponda ao desconto
-        promotion = self._find_matching_promotion(percentage_discount)
+    def update_product(self, product_id: str, data: ProductUpdate) -> ProductRead:
+        """Atualiza um produto e reavalia sua associação com promoções"""
+        try:
+            # Atualiza o produto
+            product = self.repo.update_product(product_id, data)
+            if not product:
+                raise HTTPException(status_code=404, detail="Produto não encontrado")
 
-        # Cria o produto com a promoção encontrada (se houver)
-        product = Product(
-            **product_data.dict(),
-            promotion_id=promotion.id if promotion else None
-        )
+            # Remove a associação atual com promoção (se houver)
+            if product.promotion_id:
+                self.repo.update_product_promotion(product.id, None)
 
-        self.session.add(product)
-        self.session.commit()
-        self.session.refresh(product)
-        return product
+            # Busca todas as promoções
+            promotions = self.promotion_repo.get_all_promotions()
 
-    def update_product(self, product_id: UUID, data: ProductUpdate) -> ProductRead:
-        product = self.repo.update_product(product_id, data)
-        if not product:
-            raise HTTPException(status_code=404, detail="Produto não encontrado")
-        return ProductRead.model_validate(product)
+            # Para cada promoção, verifica se o produto atende aos critérios de desconto
+            discount_percentage = product.percentage_discount()
+            for promotion in promotions:
+                if promotion.min_discount_percentage <= discount_percentage <= promotion.max_discount_percentage:
+                    self.repo.update_product_promotion(product.id, promotion.id)
+                    break
 
-    def delete_product(self, product_id: UUID):
-        if not self.repo.get_by_id(product_id):
-            raise HTTPException(status_code=404, detail="Produto não encontrado")
-        self.repo.delete_product(product_id)
+            return self._format_product_response(self.repo.get_by_id(product.id))
 
-    def get_product_by_id(self, product_id: UUID) -> ProductRead:
+        except Exception as e:
+            self.session.rollback()
+            raise e
+
+    def delete_product(self, product_id: str):
+        """Remove um produto e sua associação com promoções"""
+        try:
+            product = self.repo.get_by_id(product_id)
+            if not product:
+                raise HTTPException(status_code=404, detail="Produto não encontrado")
+
+            # Remove a associação com promoção se existir
+            if product.promotion_id:
+                self.promotion_repo.remove_products_from_promotion(str(product.promotion_id))
+
+            self.repo.delete_product(product_id)
+        except Exception as e:
+            self.session.rollback()
+            raise e
+
+    def get_product_by_id(self, product_id: str) -> ProductRead:
         product = self.repo.get_by_id(product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Produto não encontrado")
-        return ProductRead.model_validate(product)
+        return self._format_product_response(product)
 
     def get_all_products(self) -> ProductReadList:
-        return ProductReadList(products=[ProductRead.model_validate(p) for p in self.repo.get_all()])
+        products = self.repo.get_all()
+        return ProductReadList(products=[self._format_product_response(p) for p in products])
 
     def filter_product(
         self,
@@ -73,4 +105,19 @@ class ProductService:
             min_discount,
             max_discount
         )
-        return ProductReadList(products=[ProductRead.model_validate(p) for p in products])
+        return ProductReadList(products=[self._format_product_response(p) for p in products])
+
+    def _format_product_response(self, product: Product) -> ProductRead:
+        """Formata a resposta do produto incluindo dados do placeholder"""
+        return ProductRead(
+            id=product.id,
+            name=product.product_placeholder.name,
+            description=product.product_placeholder.description,
+            price=product.price,
+            discount_price=product.discount_price,
+            url=product.url,
+            image_url=product.product_placeholder.background_image,
+            product_placeholder_id=product.product_placeholder_id,
+            establishment_id=product.establishment_id,
+            promotion_id=product.promotion_id
+        )

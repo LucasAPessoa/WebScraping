@@ -1,47 +1,55 @@
 from typing import List, Optional
-from uuid import UUID
-from sqlmodel import Session, select
+from uuid import UUID, uuid4
+from sqlmodel import select
 from app.models.models import Product
 from app.schemas.product_schema import ProductCreate, ProductUpdate
+from sqlalchemy.orm import Session
 
 class ProductRepository:
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self, db: Session):
+        self.db = db
 
     def create_product(self, product_create: ProductCreate) -> Product:
-        product = Product(**product_create.model_dump())
-        self.session.add(product)
-        self.session.commit()
-        self.session.refresh(product)
-        return product
+        try:
+            product = Product(
+                id=str(uuid4()),
+                **product_create.model_dump()
+            )
+            self.db.add(product)
+            self.db.commit()
+            self.db.refresh(product)
+            return product
+        except Exception as e:
+            self.db.rollback()
+            raise e
 
-    def get_by_id(self, product_id: UUID) -> Optional[Product]:
-        return self.session.get(Product, product_id)
+    def get_by_id(self, product_id: str) -> Optional[Product]:
+        return self.db.get(Product, product_id)
 
-    def update_product(self, product_id: UUID, product_update: ProductUpdate) -> Optional[Product]:
-        product = self.session.get(Product, product_id)
+    def update_product(self, product_id: str, product_update: ProductUpdate) -> Optional[Product]:
+        product = self.db.get(Product, product_id)
         if not product:
             return None
         for key, value in product_update.model_dump(exclude_unset=True).items():
             setattr(product, key, value)
-        self.session.commit()
-        self.session.refresh(product)
+        self.db.commit()
+        self.db.refresh(product)
         return product
 
-    def delete_product(self, product_id: UUID) -> None:
-        product = self.session.get(Product, product_id)
+    def delete_product(self, product_id: str) -> None:
+        product = self.db.get(Product, product_id)
         if product:
-            self.session.delete(product)
-            self.session.commit()
+            self.db.delete(product)
+            self.db.commit()
 
     def get_all(self) -> List[Product]:
-        return self.session.exec(select(Product)).all()
+        return self.db.query(Product).all()
 
     def filter_products(
         self,
-        product_placeholder_id: Optional[UUID] = None,
-        establishment_id: Optional[UUID] = None,
-        promotion_id: Optional[UUID] = None,
+        product_placeholder_id: Optional[str] = None,
+        establishment_id: Optional[str] = None,
+        promotion_id: Optional[str] = None,
         min_discount: Optional[float] = None,
         max_discount: Optional[float] = None
     ) -> List[Product]:
@@ -54,7 +62,7 @@ class ProductRepository:
         if promotion_id:
             statement = statement.where(Product.promotion_id == promotion_id)
 
-        results = self.session.exec(statement).all()
+        results = self.db.query(Product).filter(statement).all()
 
         filtered = []
         for product in results:
@@ -63,3 +71,14 @@ class ProductRepository:
                 filtered.append(product)
 
         return filtered
+
+    def update_product_promotion(self, product_id: str, promotion_id: Optional[str]) -> None:
+        """Atualiza a promoção de um produto"""
+        try:
+            self.db.query(Product).filter(Product.id == product_id).update(
+                {Product.promotion_id: promotion_id}
+            )
+            self.db.commit()
+        except Exception as e:
+            self.db.rollback()
+            raise e

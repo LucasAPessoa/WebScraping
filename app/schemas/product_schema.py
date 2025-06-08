@@ -1,46 +1,31 @@
-from typing import Optional
-from uuid import UUID
+from typing import Optional, List
 from pydantic import BaseModel, Field
-from datetime import datetime
+from uuid import UUID
 
 class ProductBase(BaseModel):
-    name: str = Field(..., description="Nome do produto")
-    description: Optional[str] = Field(None, description="Descrição do produto")
     price: float = Field(..., description="Preço original do produto")
     discount_price: Optional[float] = Field(None, description="Preço com desconto")
-    url: Optional[str] = Field(None, description="URL do produto")
-    image_url: Optional[str] = Field(None, description="URL da imagem do produto")
+    url: str = Field(..., description="URL do produto")
     product_placeholder_id: str = Field(..., description="ID do produto placeholder")
     establishment_id: str = Field(..., description="ID do estabelecimento")
-    promotion_id: Optional[str] = Field(None, description="ID da promoção")
+    promotion_id: Optional[str] = Field(None, description="ID da promoção associada")
 
 class ProductCreate(ProductBase):
     pass
 
 class ProductUpdate(BaseModel):
-    name: Optional[str] = Field(None, description="Nome do produto")
-    description: Optional[str] = Field(None, description="Descrição do produto")
     price: Optional[float] = Field(None, description="Preço original do produto")
     discount_price: Optional[float] = Field(None, description="Preço com desconto")
     url: Optional[str] = Field(None, description="URL do produto")
-    image_url: Optional[str] = Field(None, description="URL da imagem do produto")
     product_placeholder_id: Optional[str] = Field(None, description="ID do produto placeholder")
     establishment_id: Optional[str] = Field(None, description="ID do estabelecimento")
-    promotion_id: Optional[str] = Field(None, description="ID da promoção")
+    promotion_id: Optional[str] = Field(None, description="ID da promoção associada")
 
 class ProductRead(ProductBase):
     id: str = Field(..., description="ID do produto")
-    percentage_discount: float = Field(..., description="Percentual de desconto")
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
-class ProductReadList(ProductBase):
-    id: str = Field(..., description="ID do produto")
-    percentage_discount: float = Field(..., description="Percentual de desconto")
-
-    class Config:
-        from_attributes = True
-
-class ProductDelete(BaseModel):
-    message: str = Field(..., description="Mensagem de confirmação")
+class ProductReadList(BaseModel):
+    products: List[ProductRead] = Field(..., description="Lista de produtos")
