@@ -1,212 +1,136 @@
 import requests
-import json
-from uuid import UUID
-import time
-from typing import Optional
+from sqlmodel import Session, select
+from app.models.models import Product_Placeholder
+from app.schemas.product_placeholder_schema import ProductPlaceholderCreate
+from app.schemas.product_schema import ProductCreate
+from app.schemas.establishment_schema import EstablishmentCreate
+from app.database import session
+from app.schemas.promotion_schema import PromotionCreate
 
-# Configurações
-BASE_URL = "http://localhost:8000"
-API_KEY = "3d33178e180644ba9c0dcbaa98278664"
+def create_games_and_products(session: Session):
+    # Lista fictícia de 50 jogos (apenas nomes para exemplo)
+    jogos = [
+    "The Legend of Zelda: Breath of the Wild",
+    "God of War",
+    "Red Dead Redemption 2",
+    "The Witcher 3: Wild Hunt",
+    "Minecraft",
+    "Fortnite",
+    "Call of Duty: Modern Warfare",
+    "Apex Legends",
+    "Overwatch",
+    "Cyberpunk 2077",
+    "Horizon Zero Dawn",
+    "Dark Souls III",
+    "Elden Ring",
+    "Super Mario Odyssey",
+    "Grand Theft Auto V",
+    "Animal Crossing: New Horizons",
+    "DOOM Eternal",
+    "Sekiro: Shadows Die Twice",
+    "Metal Gear Solid V",
+    "Resident Evil 2",
+    "Persona 5",
+    "Final Fantasy VII Remake",
+    "Bloodborne",
+    "Splatoon 2",
+    "Monster Hunter: World",
+    "FIFA 21",
+    "Rocket League",
+    "Celeste",
+    "Stardew Valley",
+    "Hollow Knight",
+    "Among Us",
+    "Fall Guys",
+    "Dead Cells",
+    "Cuphead",
+    "The Last of Us Part II",
+    "Uncharted 4",
+    "Bayonetta 2",
+    "Disco Elysium",
+    "The Outer Worlds",
+    "Control",
+    "Diablo III",
+    "Destiny 2",
+    "Borderlands 3",
+    "The Sims 4",
+    "Battlefield V",
+    "Marvel's Spider-Man",
+    "FIFA 22",
+    "Super Smash Bros. Ultimate",
+    "Ghost of Tsushima",
+    "Death Stranding"
+]
+    establishment = EstablishmentCreate(name="Steam123", url="https://store.steampowered.com")
+    response_establishment = requests.post("http://localhost:8000/establishments/", json=establishment.model_dump())
+    print(f"Status code: {response_establishment.status_code}")
+    print(f"Response content: {response_establishment.text}")
+    
+    if response_establishment.status_code != 200: 
+        raise Exception("Erro ao criar estabelecimento")
 
-def check_api_status():
-    try:
-        response = requests.get(f"{BASE_URL}/docs")
-        if response.status_code == 200:
-            print("API está online e acessível!")
-            return True
-        else:
-            print(f"API retornou status code: {response.status_code}")
-            return False
-    except requests.exceptions.ConnectionError:
-        print("ERRO: Não foi possível conectar à API!")
-        print("Certifique-se de que a API está rodando com o comando:")
-        print("uvicorn app.main:app --reload")
-        return False
-
-def print_section(title: str):
-    print("\n" + "=" * 50)
-    print(" " * ((50 - len(title)) // 2) + title)
-    print("=" * 50 + "\n")
-
-def test_promotion():
-    promotion_data = {
-        "name": "Promoção de Verão"
-    }
-    
-    response = requests.post(f"{BASE_URL}/promotions/", json=promotion_data)
-    print(f"\nCriando promoção: {json.dumps(promotion_data, indent=2)}")
-    
-    if response.status_code != 201:
-        print(f"Erro ao criar promoção: {response.status_code}")
-        print(response.text)
-        return None
-    
-    print(f"Promoção criada: {json.dumps(response.json(), indent=2)}")
-    
-    promotion_id = response.json()["id"]
-    
-    # Teste de atualização
-    update_data = {
-        "name": "Promoção de Verão Atualizada"
-    }
-    
-    response = requests.put(f"{BASE_URL}/promotions/{promotion_id}", json=update_data)
-    print(f"\nAtualizando promoção: {json.dumps(update_data, indent=2)}")
-    
-    if response.status_code != 200:
-        print(f"Erro ao atualizar promoção: {response.status_code}")
-        print(response.text)
-        return None
-    
-    print(f"Promoção atualizada: {json.dumps(response.json(), indent=2)}")
-    
-    return promotion_id
-
-def test_establishment():
-    establishment_data = {
-        "name": "Loja de Games",
-        "url": "https://lojadegames.com"
-    }
-    
-    response = requests.post(f"{BASE_URL}/establishments/", json=establishment_data)
-    print(f"\nCriando estabelecimento: {json.dumps(establishment_data, indent=2)}")
-    
-    if response.status_code != 201:
-        print(f"Erro ao criar estabelecimento: {response.status_code}")
-        print(response.text)
-        return None
-    
-    print(f"Estabelecimento criado: {json.dumps(response.json(), indent=2)}")
-    
-    establishment_id = response.json()["id"]
-    
-    # Teste de atualização
-    update_data = {
-        "name": "Loja de Games Atualizada",
-        "url": "https://lojadegames.com.br"
-    }
-    
-    response = requests.put(f"{BASE_URL}/establishments/{establishment_id}", json=update_data)
-    print(f"\nAtualizando estabelecimento: {json.dumps(update_data, indent=2)}")
-    
-    if response.status_code != 200:
-        print(f"Erro ao atualizar estabelecimento: {response.status_code}")
-        print(response.text)
-        return None
-    
-    print(f"Estabelecimento atualizado: {json.dumps(response.json(), indent=2)}")
-    
-    return establishment_id
-
-def test_product_placeholder():
-    product_data = {
-        "name": "The Witcher 3"
-    }
-    
-    response = requests.post(f"{BASE_URL}/product-placeholders/", json=product_data)
-    print(f"\nCriando produto: {json.dumps(product_data, indent=2)}")
-    
-    if response.status_code != 201:
-        print(f"Erro ao criar produto: {response.status_code}")
-        print(response.text)
-        return None
-    
-    print(f"Produto criado: {json.dumps(response.json(), indent=2)}")
-    
-    product_id = response.json()["id"]
-    
-    # Teste de atualização
-    update_data = {
-        "name": "The Witcher 3: Wild Hunt"
-    }
-    
-    response = requests.put(f"{BASE_URL}/product-placeholders/{product_id}", json=update_data)
-    print(f"\nAtualizando produto: {json.dumps(update_data, indent=2)}")
-    
-    if response.status_code != 200:
-        print(f"Erro ao atualizar produto: {response.status_code}")
-        print(response.text)
-        return None
-    
-    print(f"Produto atualizado: {json.dumps(response.json(), indent=2)}")
-    
-    return product_id
-
-def test_product(product_placeholder_id, establishment_id, promotion_id):
-    product_data = {
-        "original_price": 199.90,
-        "discounted_price": 149.90,
-        "product_placeholder_id": product_placeholder_id,
-        "establishment_id": establishment_id,
-        "promotion_id": promotion_id
-    }
-    
-    response = requests.post(f"{BASE_URL}/products/", json=product_data)
-    print(f"\nCriando produto: {json.dumps(product_data, indent=2)}")
-    
-    if response.status_code != 201:
-        print(f"Erro ao criar produto: {response.status_code}")
-        print(response.text)
-        return None
-    
-    print(f"Produto criado: {json.dumps(response.json(), indent=2)}")
-    
-    product_id = response.json()["id"]
-    
-    # Teste de atualização
-    update_data = {
-        "original_price": 189.90,
-        "discounted_price": 139.90
-    }
-    
-    response = requests.put(f"{BASE_URL}/products/{product_id}", json=update_data)
-    print(f"\nAtualizando produto: {json.dumps(update_data, indent=2)}")
-    
-    if response.status_code != 200:
-        print(f"Erro ao atualizar produto: {response.status_code}")
-        print(response.text)
-        return None
-    
-    print(f"Produto atualizado: {json.dumps(response.json(), indent=2)}")
-    
-    return product_id
-
-def main():
-    print("Iniciando testes da API...")
-    
-    # Verificar se a API está online
-    try:
-        response = requests.get(f"{BASE_URL}/categories/")
-        if response.status_code in [200, 201]:
-            print("API está online e acessível!")
-        else:
-            print(f"API retornou status code inesperado: {response.status_code}")
-            return
-    except Exception as e:
-        print(f"Erro ao acessar a API: {str(e)}")
-        return
-    
-    # Teste de promoção
-    promotion_id = test_promotion()
-    if not promotion_id:
-        return
-    
-    # Teste de estabelecimento
-    establishment_id = test_establishment()
+    establishment_id = response_establishment.json().get("id")
     if not establishment_id:
-        return
+        raise Exception("Resposta da API não contém 'id'")
     
-    # Teste de produto placeholder
-    product_placeholder_id = test_product_placeholder()
-    if not product_placeholder_id:
-        return
     
-    # Teste de produto
-    product_id = test_product(product_placeholder_id, establishment_id, promotion_id)
-    if not product_id:
-        return
+    promotion = PromotionCreate(  name="supersale",
+    description="string",
+    min_discount_percentage=0,
+    max_discount_percentage=100)
     
-    print("\nTodos os testes foram concluidos com sucesso!")
+    response_promotion = requests.post("http://localhost:8000/promotions/", json=promotion.model_dump())
+    print(f"Status code: {response_promotion.status_code}")
+    print(f"Response content: {response_promotion.text}")
+    
+    if response_promotion.status_code != 201:
+        raise Exception("Erro ao criar promoção")
+    
+    promotion_id = response_promotion.json().get("id")
+    if not promotion_id:
+        raise Exception("Resposta da API não contém 'id'")
+    
 
+
+
+    for nome_jogo in jogos:
+        # Cria um placeholder para o jogo
+        game_placeholder = ProductPlaceholderCreate(name=nome_jogo)
+        response = requests.post("http://localhost:8000/product-placeholders/", json=game_placeholder.model_dump())
+
+        if response.status_code not in (200, 201):
+            print(f"Erro ao criar product-placeholder para '{nome_jogo}':", response.status_code, response.text)
+            continue
+
+        try:
+            game_placeholder_id = response.json()["id"]
+        except (KeyError, ValueError) as e:
+            print(f"Resposta inesperada ao criar product-placeholder para '{nome_jogo}':", response.text)
+            continue
+
+        # Cria 2 produtos diferentes para o mesmo jogo
+        product1 = ProductCreate(
+            price=120.00,
+            discount_price=80.00,
+            url="https://store.steampowered.com/app/1202070/Sekiro_Shadows_Die_Twice/",
+            product_placeholder_id=game_placeholder_id,
+            establishment_id=establishment_id,
+            promotion_id=promotion_id
+        )
+        product2 = ProductCreate(
+            price=43.98,
+            discount_price=20.99,
+            url="https://store.steampowered.com/app/1202070/Sekiro_Shadows_Die_Twice/",
+            product_placeholder_id=game_placeholder_id,
+            establishment_id=establishment_id,
+            promotion_id=promotion_id
+        )
+
+        for product in [product1, product2]:
+            response = requests.post("http://localhost:8000/products/", json=product.model_dump())
+            if response.status_code not in (200, 201):
+                print(f"Erro ao criar produto para '{nome_jogo}':", response.status_code, response.text)
+
+    print("48 jogos e 2 produtos para cada criados com sucesso!")
 if __name__ == "__main__":
-    main() 
+    create_games_and_products(session)
